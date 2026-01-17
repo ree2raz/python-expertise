@@ -36,4 +36,26 @@ Code : `what_is_parallelism.py`
 
 > In the industry, we call this "Blocking the Event Loop." 🛑 It’s one of the most common performance killers in Python systems.
 
+### The Universal Scaling Problem
+
+- This isn't just a Python problem. Whether you're using Node.js (JavaScript), Go, or Rust, the mental model for handling scale always comes down to these two questions:
+    - Is the CPU waiting? (Network request, reading a file, waiting for a database).
+        - Solution: Concurrency (Event loops, Green threads).
+    - Is the CPU working? (Calculating audio frequencies, encrypting data, AI inference).
+        - Solution: Parallelism (Multiple Processes, Multiple OS Threads).
+
+--
+
+### Designing the "Hybrid" System
+
+- You use a Hybrid Model, imagine this architecture :
+    - The Manager (Asyncio): One thread handles 5,000 active WebSocket connections. It's great at "waiting" for audio packets. 🎙️
+    - The Workers (Multiprocessing): Whenever an audio packet needs "work" (like converting speech to text), the Manager ships that data off to a worker on a different core. ⚙️
+
+### The Cost of Parallelism
+
+- While Parallelism gives us more power, it isn't "free." In Python, when you move from a single-threaded asyncio loop to multiprocessing, you encounter a new challenge: Data Communication.
+- In the asyncio script, all tasks shared the same memory. In the multiprocessing script, each process has its own private memory "island." 🏝️
+- If you have a 10MB audio buffer in the Manager process and you want a Worker process to process it, you have to copy that data over.
+
 
